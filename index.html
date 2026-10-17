@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pete’s Balloon Problem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--sky1:#8fd3ff;--sky2:#ffe7b0;--ink:#26204d;--card:#ffffffd9;--line:#26204d22;--accent:#ff4f8b;--accent2:#ffb703;--good:#1f9d63;--bad:#d93a4a;--pud:#f4b74e;--pudd:#d9902b;--key:#fff;--keyink:#26204d;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--sky1:#1b1750;--sky2:#5b2a6e;--ink:#fff4e0;--card:#1d1946d9;--line:#fff4e022;--key:#2b2666;--keyink:#fff4e0;--pud:#d99a35;--pudd:#b87420}}
+:root[data-theme="dark"]{--sky1:#1b1750;--sky2:#5b2a6e;--ink:#fff4e0;--card:#1d1946d9;--line:#fff4e022;--key:#2b2666;--keyink:#fff4e0;--pud:#d99a35;--pudd:#b87420}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{font-family:"Fredoka",system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:linear-gradient(170deg,var(--sky1),var(--sky2)) fixed;min-height:100vh;overflow-x:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+main{max-width:720px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:clamp(2rem,7vw,3.2rem);line-height:1;margin:8px 0 6px;font-weight:700;letter-spacing:-.02em}
+.sub{margin:0 0 20px;font-size:1.1rem;opacity:.85}
+.card{background:var(--card);border:2px solid var(--line);border-radius:28px;padding:20px;backdrop-filter:blur(8px);box-shadow:0 14px 40px #26204d26}
+h2{font-size:1.15rem;margin:0 0 10px;font-weight:600}
+.themes{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px}
+.theme{border:2px solid var(--line);background:var(--key);border-radius:20px;padding:14px 8px;text-align:center;transition:transform .15s,border-color .15s,box-shadow .15s}
+.theme:hover{transform:translateY(-3px) rotate(-1.5deg)}
+.theme[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 4px #ff4f8b33;transform:scale(1.04)}
+.theme b{display:block;font-size:2rem}.theme span{font-size:.95rem;font-weight:500}.theme small{display:block;opacity:.7;font-size:.78rem}
+.diffs{display:grid;gap:8px;margin-bottom:22px}
+.diff{display:flex;align-items:center;gap:12px;text-align:left;border:2px solid var(--line);background:var(--key);border-radius:18px;padding:12px 14px}
+.diff[aria-pressed="true"]{border-color:var(--accent);background:linear-gradient(90deg,#ff4f8b22,var(--key))}
+.diff i{font-style:normal;font-size:1.6rem}.diff span{display:block;font-weight:600}.diff small{opacity:.75}
+.go{width:100%;border:0;border-radius:20px;padding:16px;font-size:1.3rem;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--accent),#ff8a3d);box-shadow:0 8px 0 #b3295a;transition:transform .1s,box-shadow .1s}
+.go:active{transform:translateY(6px);box-shadow:0 2px 0 #b3295a}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.pill{background:var(--key);border:2px solid var(--line);border-radius:99px;padding:6px 14px;font-weight:600;font-size:.95rem}
+.link{background:none;border:0;text-decoration:underline;font-weight:500;padding:6px}
+.stage{position:relative;border-radius:24px;overflow:hidden;background:linear-gradient(#aee0ff,#fff1c9);border:2px solid var(--line)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .stage{background:linear-gradient(#2a2477,#7a3b86)}}
+.stage svg{display:block;width:100%;max-height:330px}
+.bubble{position:absolute;top:10px;left:10px;right:10px;margin:0 auto;max-width:430px;background:#fff;color:#26204d;border-radius:18px;padding:10px 14px;font-weight:500;font-size:1rem;box-shadow:0 6px 18px #0002;text-align:center;animation:pop .25s}
+@keyframes pop{from{transform:scale(.85);opacity:0}}
+.word{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:18px 0}
+.tile{width:clamp(28px,8.5vw,46px);height:clamp(40px,11vw,58px);display:grid;place-items:center;font-size:clamp(1.3rem,5vw,2rem);font-weight:700;background:var(--key);color:var(--keyink);border-radius:12px;border-bottom:5px solid var(--accent2)}
+.tile.on{animation:flip .4s}.tile.miss{color:var(--bad);border-bottom-color:var(--bad)}
+@keyframes flip{from{transform:rotateX(90deg) scale(.6)}}
+.kb{display:flex;flex-direction:column;gap:7px;align-items:center}
+.row{display:flex;gap:5px;justify-content:center;width:100%}
+.k{flex:1;max-width:48px;height:50px;border:0;border-radius:12px;background:var(--key);color:var(--keyink);font-weight:600;font-size:1.1rem;box-shadow:0 4px 0 var(--line);transition:transform .08s}
+.k:active:not(:disabled){transform:translateY(3px)}
+.k.ok{background:var(--good);color:#fff}.k.no{background:var(--bad);color:#fff;opacity:.55}
+.k:disabled{cursor:default}
+.tools{display:flex;gap:10px;justify-content:center;margin-top:16px}
+.tool{border:2px solid var(--line);background:var(--key);border-radius:16px;padding:10px 16px;font-weight:600}
+.tool:disabled{opacity:.45}
+.over{position:fixed;inset:0;display:grid;place-items:center;background:#0007;padding:20px;z-index:20;animation:pop .3s}
+.over .card{max-width:380px;text-align:center;background:var(--key)}
+.over h2{font-size:1.9rem;margin:4px 0}.over p{margin:6px 0 16px}
+.big{font-size:3.4rem}
+.conf{position:fixed;top:-30px;font-size:1.6rem;pointer-events:none;z-index:30;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+.shake{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<h1>Pete’s Balloon Problem 🎈</h1>
+<p class="sub">Pete is floating above a pool of pudding. Every wrong guess pops a balloon. Guess the word before he gets dessert.</p>
+
+<section id="setup" class="card">
+  <h2>Pick a theme</h2>
+  <div class="themes" id="themes"></div>
+  <h2>Pick your danger level</h2>
+  <div class="diffs" id="diffs"></div>
+  <button class="go" id="start">Launch Pete</button>
+</section>
+
+<section id="game" hidden>
+  <div class="bar">
+    <button class="link" id="back">Change theme</button>
+    <span class="pill" id="info"></span>
+    <span class="pill" id="score"></span>
+  </div>
+  <div class="stage" id="stage"><p class="bubble" id="bubble" aria-live="polite"></p><svg id="svg" viewBox="0 0 300 340" role="img" aria-label="Pete hanging from balloons above a pudding pool"></svg></div>
+  <div class="word" id="word" aria-label="Word to guess"></div>
+  <div class="kb" id="kb"></div>
+  <div class="tools"><button class="tool" id="hint">💡 Hint (costs a balloon)</button><button class="tool" id="mute" aria-pressed="false">🔊 Sound</button></div>
+</section>
+</main>
+<div class="over" id="over" hidden><div class="card" role="dialog" aria-modal="true" aria-labelledby="ot"><div class="big" id="oe"></div><h2 id="ot"></h2><p id="op"></p><button class="go" id="again">Play again</button></div></div>
+
+<script>
+const THEMES={
+food:{n:"Snack Attack",e:"🍕",t:"Calories not included",w:"PIZZA TACO BAGEL DONUT WAFFLE PASTA SALAD SUSHI NACHOS PRETZEL CHEESE BACON MUFFIN COOKIE PEANUT RAMEN FRIES TOAST PICKLE CANDY NOODLES PANCAKE BURRITO CUPCAKE POPCORN LASAGNA SANDWICH BROWNIE PUDDING MEATBALL OMELETTE DUMPLING CINNAMON SPAGHETTI GUACAMOLE CHEESECAKE CROISSANT MILKSHAKE PEPPERONI CASSEROLE CHOCOLATE QUESADILLA MARSHMALLOW CHEESEBURGER CAULIFLOWER".split(" ")},
+animals:{n:"Weird Wildlife",e:"🦦",t:"Nature is unhinged",w:"SLOTH LLAMA OTTER KOALA PANDA ZEBRA MOOSE TIGER SHEEP CAMEL EAGLE MOUSE SQUID SNAKE LEMUR WALRUS PENGUIN GIRAFFE FLAMINGO KANGAROO PLATYPUS HEDGEHOG OCTOPUS DOLPHIN GORILLA PELICAN LOBSTER PANTHER BADGER FERRET CHAMELEON RHINOCEROS CROCODILE ORANGUTAN HIPPOPOTAMUS PORCUPINE ARMADILLO CHIMPANZEE WOLVERINE SALAMANDER BUTTERFLY DRAGONFLY".split(" ")},
+space:{n:"Cosmic Nonsense",e:"🚀",t:"No gravity, no problem",w:"MOON COMET ALIEN GALAXY ROCKET NEBULA ORBIT MARS VENUS PLUTO SOLAR LUNAR COSMOS METEOR SATURN GRAVITY ECLIPSE STARDUST ASTEROID JUPITER NEPTUNE UNIVERSE PLANETS CRATERS ASTRONAUT SUPERNOVA SATELLITE BLACKHOLE TELESCOPE CONSTELLATION METEORITE SPACESHIP OBSERVATORY ASTRONOMER MICROGRAVITY".split(" ")},
+office:{n:"Corporate Chaos",e:"📎",t:"This could have been an email",w:"AGILE EMAIL COFFEE BUDGET SLIDES SPRINT AUDIT MEMO HUDDLE SYNERGY MEETING DEADLINE ROADMAP WEBINAR STANDUP PRINTER STAPLER CUBICLE INVOICE CALENDAR BANDWIDTH STAKEHOLDER SPREADSHEET DELIVERABLE MICROMANAGE BRAINSTORM QUARTERLY PRESENTATION ESCALATION CIRCLEBACK PROCRASTINATE DELEGATION".split(" ")},
+fantasy:{n:"Dragons & Drama",e:"🐉",t:"Mostly dragons",w:"DRAGON WIZARD GOBLIN TROLL POTION ELVES CASTLE QUEST SWORD DWARF GNOME FAIRY WITCH RUNES UNICORN WARLOCK GRIFFIN DUNGEON SORCERER MINSTREL PHOENIX KINGDOM WEREWOLF VAMPIRE MERMAID CENTAUR PROPHECY ENCHANTED NECROMANCER SHAPESHIFTER INVISIBLE LEVITATION SPELLBOOK ALCHEMIST BLACKSMITH ENCHANTRESS DRAGONSLAYER".split(" ")}
+};
+const DIFFS={
+easy:{n:"Chill",e:"😎",d:"8 balloons, short words",lives:8,ok:l=>l<=6},
+mid:{n:"Spicy",e:"🌶️",d:"6 balloons, medium words",lives:6,ok:l=>l>=7&&l<=8},
+hard:{n:"Unhinged",e:"🤯",d:"4 balloons, long words",lives:4,ok:l=>l>=9}
+};
+const LINES={
+right:["Nailed it. Pete does a tiny dance.","Correct! Pete’s hair stands up in awe.","Yes! Pete would high-five you but his hands are full.","Look at you, a letter whisperer.","Brilliant. Pete’s balloons feel safer already."],
+wrong:["Pop! That was Pete’s favorite balloon.","Nope! Pete is sinking and has opinions about it.","Wrong! The pudding is looking very smug.","Ouch. Pete just whispered a very bad word.","Oops. Somewhere a balloon is crying confetti.","That letter is not in the word. Pete is not mad, just disappointed."],
+hint:["Pete bribed a balloon for that clue.","Hint delivered. A balloon sacrificed itself."],
+win:["Pete lives! He promises to never go near pudding again.","You saved Pete! He’s naming his firstborn after you.","Victory! The pudding goes hungry tonight."],
+lose:["Splat! Pete is now a pudding garnish.","Pete has entered the dessert. He says it’s warm.","Nooo! Pete is gone, but he looks delicious."],
+start:["Pete is nervous. Pete is also floating. Pick a letter.","Ready when you are. Pete has sweaty palms.","Pete checked the wind. It’s fine. Probably."]
+};
+const $=id=>document.getElementById(id), pick=a=>a[Math.floor(Math.random()*a.length)];
+const SEEN={};let theme="food",diff="mid",S=null,wins=0,losses=0,streak=0,muted=false,dy=0,anim=null,burst=null,ac=null;
+
+function buildSetup(){
+  $("themes").innerHTML=Object.entries(THEMES).map(([k,t])=>`<button class="theme" data-k="${k}" aria-pressed="${k===theme}"><b>${t.e}</b><span>${t.n}</span><small>${t.t}</small></button>`).join("");
+  $("diffs").innerHTML=Object.entries(DIFFS).map(([k,d])=>`<button class="diff" data-k="${k}" aria-pressed="${k===diff}"><i>${d.e}</i><div><span>${d.n}</span><small>${d.d}</small></div></button>`).join("");
+}
+$("themes").onclick=e=>{const b=e.target.closest(".theme");if(b){theme=b.dataset.k;buildSetup();tone(520,.08)}};
+$("diffs").onclick=e=>{const b=e.target.closest(".diff");if(b){diff=b.dataset.k;buildSetup();tone(440,.08)}};
+
+function tone(f,d=.12,type="sine",v=.07){
+  if(muted)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=f;g.gain.value=v;g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+d);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d)}catch(e){}
+}
+const say=t=>{const b=$("bubble");b.textContent=t;b.style.animation="none";void b.offsetWidth;b.style.animation=""};
+
+function newWord(){
+  const all=THEMES[theme].w,D=DIFFS[diff];
+  let pool=all.filter(w=>D.ok(w.length));if(!pool.length)pool=all;
+  const key=theme+diff,used=SEEN[key]=SEEN[key]||new Set();
+  let fresh=pool.filter(w=>!used.has(w));
+  if(!fresh.length){used.clear();fresh=pool.filter(w=>!S||w!==S.word);if(!fresh.length)fresh=pool}
+  const w=pick(fresh);used.add(w);return w;
+}
+function start(){
+  const D=DIFFS[diff];
+  S={word:newWord(),got:new Set(),max:D.lives,lives:D.lives,over:false,won:false};
+  burst=null;tween(0);
+  $("setup").hidden=true;$("game").hidden=false;$("over").hidden=true;
+  $("info").textContent=THEMES[theme].e+" "+THEMES[theme].n+" · "+D.n;
+  buildKb();renderWord();renderStats();say(pick(LINES.start));$("hint").disabled=false;
+}
+function buildKb(){
+  $("kb").innerHTML=["QWERTYUIOP","ASDFGHJKL","ZXCVBNM"].map(r=>`<div class="row">${[...r].map(l=>`<button class="k" data-l="${l}" aria-label="Letter ${l}">${l}</button>`).join("")}</div>`).join("");
+}
+$("kb").onclick=e=>{const b=e.target.closest(".k");if(b)guess(b.dataset.l)};
+addEventListener("keydown",e=>{if(!S||$("game").hidden||!$("over").hidden||e.ctrlKey||e.metaKey||e.altKey)return;if(/^[a-z]$/i.test(e.key))guess(e.key.toUpperCase())});
+
+function renderWord(){
+  $("word").innerHTML=[...S.word].map(c=>{const on=S.got.has(c),miss=S.over&&!S.won&&!on;return `<div class="tile ${miss?"miss":""}">${on||miss?c:""}</div>`}).join("");
+}
+function renderStats(){$("score").textContent=`Saved ${wins} · Puddinged ${losses}`+(streak>1?` · 🔥${streak}`:"")}
+function mark(l,ok){const k=document.querySelector(`.k[data-l="${l}"]`);if(k){k.classList.add(ok?"ok":"no");k.disabled=true}}
+
+function guess(l){
+  if(S.over||S.got.has(l)||document.querySelector(`.k[data-l="${l}"]`)?.disabled)return;
+  if(S.word.includes(l)){
+    S.got.add(l);mark(l,true);tone(660,.1,"triangle");tone(880,.12,"triangle");
+    renderWord();document.querySelectorAll(".tile").forEach((t,i)=>{if(S.word[i]===l)t.classList.add("on")});
+    if([...S.word].every(c=>S.got.has(c)))return finish(true);
+    say(pick(LINES.right));
+  }else{
+    mark(l,false);pop();say(pick(LINES.wrong));
+  }
+}
+function pop(){
+  S.lives--;burst=S.lives;tone(180,.18,"sawtooth",.09);
+  $("stage").classList.remove("shake");void $("stage").offsetWidth;$("stage").classList.add("shake");
+  tween((S.max-S.lives)/S.max*118);
+  if(S.lives<=0)finish(false);
+}
+$("hint").onclick=()=>{
+  if(!S||S.over||S.lives<2)return;
+  const left=[...new Set(S.word)].filter(c=>!S.got.has(c));
+  const l=pick(left);S.got.add(l);mark(l,true);pop();renderWord();
+  document.querySelectorAll(".tile").forEach((t,i)=>{if(S.word[i]===l)t.classList.add("on")});
+  if([...S.word].every(c=>S.got.has(c))){finish(true)}else say(pick(LINES.hint));
+};
+$("mute").onclick=function(){muted=!muted;this.setAttribute("aria-pressed",muted);this.textContent=muted?"🔇 Muted":"🔊 Sound"};
+
+function finish(win){
+  S.over=true;S.won=win;
+  if(win){wins++;streak++;tone(523,.15,"triangle");setTimeout(()=>tone(659,.15,"triangle"),150);setTimeout(()=>tone(784,.3,"triangle"),300);confetti()}
+  else{losses++;streak=0;tween(128);[300,240,180,120].forEach((f,i)=>setTimeout(()=>tone(f,.2,"square",.06),i*140))}
+  renderWord();renderStats();draw();
+  const m=pick(win?LINES.win:LINES.lose);say(m);
+  document.querySelectorAll(".k").forEach(k=>k.disabled=true);$("hint").disabled=true;
+  setTimeout(()=>{
+    $("oe").textContent=win?"🎉":"🍮";
+    $("ot").textContent=win?"Pete is saved!":"Pete is dessert.";
+    $("op").textContent=(win?"":"The word was "+S.word+". ")+m;
+    $("over").hidden=false;$("again").focus();
+  },win?900:1300);
+}
+$("again").onclick=start;
+$("back").onclick=()=>{$("game").hidden=true;$("setup").hidden=false;$("over").hidden=true};
+$("start").onclick=start;
+
+function confetti(){
+  const e=["🎉","🎈","🍮","✨","🥳"];
+  for(let i=0;i<34;i++){const s=document.createElement("span");s.className="conf";s.textContent=pick(e);s.style.left=Math.random()*100+"vw";s.style.animationDuration=(2+Math.random()*2)+"s";s.style.animationDelay=Math.random()*.6+"s";document.body.appendChild(s);setTimeout(()=>s.remove(),5000)}
+}
+
+function tween(target){
+  cancelAnimationFrame(anim);const from=dy,t0=performance.now();
+  const step=t=>{const p=Math.min(1,(t-t0)/700),e=1-Math.pow(1-p,3);dy=from+(target-from)*e;draw();if(p<1)anim=requestAnimationFrame(step)};
+  anim=requestAnimationFrame(step);
+}
+const COLORS=["#ff4f8b","#ffb703","#3ab0ff","#5ed38a","#a66bff","#ff7a3d","#ff5252","#2ec4b6"];
+function draw(){
+  if(!S)return;
+  const max=S.max,hx=150,hy=140+dy,r=S.lives/max;
+  let s=`<defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--pud)"/><stop offset="1" stop-color="var(--pudd)"/></linearGradient></defs>`;
+  const pos=i=>{const a=(-68+136*(max===1?.5:i/(max-1)))*Math.PI/180,R=88+(i%2)*24;return[150+Math.sin(a)*R*1.15,150-Math.cos(a)*R]};
+  for(let i=0;i<max;i++){
+    const[bx,by]=pos(i);
+    if(i<S.lives){s+=`<line x1="${bx}" y1="${by+26}" x2="${hx}" y2="${hy}" stroke="#26204d" stroke-opacity=".55" stroke-width="1.5"/><ellipse cx="${bx}" cy="${by}" rx="21" ry="26" fill="${COLORS[i%COLORS.length]}"/><ellipse cx="${bx-7}" cy="${by-9}" rx="5" ry="8" fill="#fff" opacity=".45"/><path d="M${bx-4} ${by+26}l4 6 4-6z" fill="${COLORS[i%COLORS.length]}"/>`}
+    else if(burst===i&&!S.over){s+=`<text x="${bx}" y="${by+8}" font-size="34" text-anchor="middle">💥</text>`}
+  }
+  const mouth=S.over&&S.won?`<path d="M136 ${hy+38} Q150 ${hy+58} 164 ${hy+38}z" fill="#7a1f3d"/>`:S.lives<=0?`<ellipse cx="150" cy="${hy+46}" rx="7" ry="9" fill="#7a1f3d"/>`:r>.66?`<path d="M139 ${hy+42} Q150 ${hy+54} 161 ${hy+42}" stroke="#7a1f3d" stroke-width="3" fill="none" stroke-linecap="round"/>`:r>.34?`<path d="M141 ${hy+47} h18" stroke="#7a1f3d" stroke-width="3" stroke-linecap="round"/>`:`<path d="M140 ${hy+52} Q150 ${hy+40} 160 ${hy+52}" stroke="#7a1f3d" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+  const eye=y=>S.lives<=0?`<path d="M-4 -4l8 8m0-8l-8 8" stroke="#26204d" stroke-width="2.5" transform="translate(${y} ${hy+28})"/>`:`<circle cx="${y}" cy="${hy+28}" r="${r<.34?5.5:4}" fill="#26204d"/>`;
+  s+=`<g><rect x="141" y="${hy+58}" width="18" height="40" rx="8" fill="#3a86ff"/><rect x="136" y="${hy+92}" width="10" height="34" rx="5" fill="#26204d"/><rect x="154" y="${hy+92}" width="10" height="34" rx="5" fill="#26204d"/><path d="M143 ${hy+62} L${hx} ${hy+4}" stroke="#ffcf99" stroke-width="7" stroke-linecap="round"/><path d="M157 ${hy+62} L${hx} ${hy+4}" stroke="#ffcf99" stroke-width="7" stroke-linecap="round"/><circle cx="150" cy="${hy+34}" r="27" fill="#ffcf99"/><path d="M124 ${hy+26} Q150 ${hy-4} 176 ${hy+26} Q150 ${hy+12} 124 ${hy+26}z" fill="#5a3a22"/>${eye(140)}${eye(160)}${mouth}`;
+  if(r<=.34&&S.lives>0)s+=`<path d="M172 ${hy+22} q5 9 0 14 q-5-5 0-14z" fill="#4cc9f0"/>`;
+  if(S.over&&S.won)s+=`<text x="150" y="${hy+10}" font-size="30" text-anchor="middle">👑</text>`;
+  s+=`</g>`;
+  s+=`<path d="M0 ${300-(S.over&&!S.won?10:0)} Q40 ${288} 80 300 T160 300 T240 300 T300 300 V340 H0z" fill="url(#pg)"/><ellipse cx="205" cy="318" rx="14" ry="6" fill="#fff" opacity=".25"/><circle cx="70" cy="${S.over&&!S.won?292:306}" r="6" fill="#c0294d"/><text x="150" y="332" font-size="13" text-anchor="middle" fill="#26204d" opacity=".8" font-family="Fredoka,sans-serif" font-weight="600">Pudding Pool</text>`;
+  $("svg").innerHTML=s;
+}
+buildSetup();
+</script>
+</body>
+</html>
